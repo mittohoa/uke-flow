@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="vi" data-lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UkeFlow — Học ukulele bằng tiếng Việt</title>
+<meta name="description" content="Ứng dụng Android học ukulele bằng tiếng Việt. Lộ trình cho người chưa từng cầm đàn, 28 hợp âm kèm hướng dẫn bấm từng ngón, máy lên dây, metronome. Miễn phí, chạy offline.">
+<meta property="og:title" content="UkeFlow — Học ukulele bằng tiếng Việt">
+<meta property="og:description" content="Lộ trình cho người chưa từng cầm đàn, 28 hợp âm kèm hướng dẫn bấm, máy lên dây bằng microphone. Miễn phí, chạy offline.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎸</text></svg>">
+
+<style>
+  :root {
+    --ground:      #F6EFE9;
+    --raised:      #FFFFFF;
+    --sunk:        #EDE3DB;
+    --ink:         #241814;
+    --ink-soft:    #6B564D;
+    --ink-faint:   #9A857A;
+    --accent:      #A8412A;
+    --accent-ink:  #FFFFFF;
+    --accent-soft: #F2D7CB;
+    --good:        #4F6B12;
+    --string:      #C9B5A8;
+    --hair:        #DDCCC1;
+    --shadow:      0 1px 2px rgba(36,24,20,.06), 0 18px 40px -18px rgba(36,24,20,.28);
+
+    --display: ui-sans-serif, "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
+    --body: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:      #16100E;
+      --raised:      #211815;
+      --sunk:        #0F0A09;
+      --ink:         #F2E7E1;
+      --ink-soft:    #B29E95;
+      --ink-faint:   #7C6960;
+      --accent:      #FFB59E;
+      --accent-ink:  #2A1712;
+      --accent-soft: #4A2A20;
+      --good:        #A8D24A;
+      --string:      #4A3730;
+      --hair:        #33241F;
+      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 22px 48px -20px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #16100E; --raised: #211815; --sunk: #0F0A09;
+    --ink: #F2E7E1; --ink-soft: #B29E95; --ink-faint: #7C6960;
+    --accent: #FFB59E; --accent-ink: #2A1712; --accent-soft: #4A2A20;
+    --good: #A8D24A; --string: #4A3730; --hair: #33241F;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 22px 48px -20px rgba(0,0,0,.8);
+  }
+  :root[data-theme="light"] {
+    --ground: #F6EFE9; --raised: #FFFFFF; --sunk: #EDE3DB;
+    --ink: #241814; --ink-soft: #6B564D; --ink-faint: #9A857A;
+    --accent: #A8412A; --accent-ink: #FFFFFF; --accent-soft: #F2D7CB;
+    --good: #4F6B12; --string: #C9B5A8; --hair: #DDCCC1;
+    --shadow: 0 1px 2px rgba(36,24,20,.06), 0 18px 40px -18px rgba(36,24,20,.28);
+  }
+
+  /* Language switch. !important on purpose: a leaked second language is a
+     far worse bug than a specificity purist's objection. */
+  html[data-lang="vi"] [lang="en"] { display: none !important; }
+  html[data-lang="en"] [lang="vi"] { display: none !important; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Top bar ─────────────────────────────────────────────────────────── */
+  .bar {
+    position: sticky; top: 0; z-index: 10;
+    /* Opaque first: where color-mix is unsupported the declaration below is
+       dropped, and a transparent sticky bar over scrolling text is unreadable. */
+    background: var(--ground);
+    background: color-mix(in srgb, var(--ground) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hair);
+  }
+  .bar .wrap {
+    display: flex; align-items: center; gap: 16px;
+    height: 60px;
+  }
+  .brand {
+    font-family: var(--display);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    font-size: 19px;
+  }
+  .brand span { color: var(--accent); }
+  .bar nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+  .langbtn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    padding: 6px 10px;
+    border: 1px solid var(--hair);
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .langbtn[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+  }
+
+  /* ── The four strings, seen edge on. Used to separate sections. ──────── */
+  .strings { display: grid; gap: 3px; padding: 56px 0 40px; }
+  .strings i { height: 1px; background: var(--string); }
+  .strings i:nth-child(1) { height: 2px; opacity: .9; }
+  .strings i:nth-child(2) { opacity: .75; }
+  .strings i:nth-child(3) { opacity: .6; }
+  .strings i:nth-child(4) { opacity: .45; }
+
+  /* ── Hero ────────────────────────────────────────────────────────────── */
+  header { padding: 64px 0 8px; }
+  .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; }
+  @media (max-width: 880px) { .hero { grid-template-columns: 1fr; gap: 36px; } }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11.5px;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--good);
+    border: 1px solid color-mix(in srgb, var(--good) 45%, transparent);
+    border-radius: 999px; padding: 5px 12px;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800; letter-spacing: -.045em; line-height: .92;
+    font-size: clamp(52px, 10vw, 96px);
+    margin: 0 0 6px;
+  }
+  h1 span { color: var(--accent); }
+  .tagline {
+    font-family: var(--mono);
+    font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 24px;
+  }
+  .lede { font-size: 18.5px; color: var(--ink-soft); max-width: 46ch; margin: 0 0 32px; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent); color: var(--accent-ink);
+    font-family: var(--display); font-weight: 700; font-size: 17px;
+    text-decoration: none;
+    padding: 15px 26px; border-radius: 10px;
+    box-shadow: var(--shadow);
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn small { font-family: var(--mono); font-size: 11px; opacity: .8; font-weight: 400; }
+  .btn-2 {
+    font-family: var(--mono); font-size: 12.5px;
+    color: var(--ink-soft); text-decoration: none;
+    border-bottom: 1px solid var(--hair);
+  }
+  .btn-2:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .undercta {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint);
+    margin: 18px 0 0; letter-spacing: .04em;
+  }
+
+  .shot {
+    background: var(--raised);
+    border: 1px solid var(--hair);
+    border-radius: 22px; padding: 8px;
+    box-shadow: var(--shadow);
+    max-width: 320px; margin-inline: auto;
+  }
+  .shot img { border-radius: 15px; }
+
+  /* ── Sections ────────────────────────────────────────────────────────── */
+  h2 {
+    font-family: var(--display);
+    font-weight: 800; letter-spacing: -.035em;
+    font-size: clamp(28px, 4.4vw, 40px);
+    line-height: 1.08; margin: 0 0 10px;
+  }
+  .sublede { color: var(--ink-soft); max-width: 60ch; margin: 0 0 40px; }
+
+  /* Quick start — three frets */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 28px; }
+  .step { border-top: 2px solid var(--accent); padding-top: 18px; }
+  .step b {
+    display: block; font-family: var(--mono); font-size: 11px;
+    letter-spacing: .18em; color: var(--accent); margin-bottom: 10px;
+  }
+  .step h3 { font-family: var(--display); font-size: 19px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.02em; }
+  .step p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
+
+  /* Highlights */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 36px 32px; }
+  .card h3 {
+    font-family: var(--display); font-size: 21px; font-weight: 800;
+    letter-spacing: -.02em; margin: 20px 0 8px;
+  }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-faint); border: 1px solid var(--hair);
+    border-radius: 999px; padding: 3px 9px; margin-top: 10px;
+  }
+
+  /* Feature list */
+  .feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px 34px; }
+  .feat { display: grid; grid-template-columns: 128px 1fr; gap: 18px; align-items: start; }
+  .feat .shot { max-width: 128px; padding: 5px; border-radius: 14px; }
+  .feat .shot img { border-radius: 9px; }
+  .feat h3 { font-family: var(--display); font-size: 17px; font-weight: 700; margin: 0 0 6px; letter-spacing: -.015em; }
+  .feat p { margin: 0; font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; }
+
+  /* FAQ */
+  details {
+    border-top: 1px solid var(--hair);
+    padding: 4px 0;
+  }
+  details:last-of-type { border-bottom: 1px solid var(--hair); }
+  summary {
+    cursor: pointer; list-style: none;
+    font-family: var(--display); font-weight: 700; font-size: 17.5px;
+    padding: 18px 32px 18px 0; position: relative;
+    letter-spacing: -.015em;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "+"; position: absolute; right: 4px; top: 15px;
+    font-family: var(--mono); font-size: 22px; color: var(--accent);
+    font-weight: 400;
+  }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 0 0 20px; color: var(--ink-soft); max-width: 66ch; font-size: 16px; }
+
+  /* Panels */
+  .panel {
+    background: var(--sunk);
+    border-radius: 14px;
+    padding: 28px 28px 26px;
+  }
+  .panel h3 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 16px;
+  }
+  .panel ul { margin: 0; padding: 0; list-style: none; }
+  .panel li {
+    display: grid; grid-template-columns: 20px 1fr; gap: 10px;
+    padding: 8px 0; font-size: 15.5px; line-height: 1.55; color: var(--ink-soft);
+  }
+  .panel li b { color: var(--ink); font-weight: 600; }
+  .tick { color: var(--good); font-family: var(--mono); }
+  .cross { color: var(--accent); font-family: var(--mono); }
+
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  .scroller { overflow-x: auto; }
+  th, td { text-align: left; padding: 10px 14px 10px 0; border-bottom: 1px solid var(--hair); }
+  th {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 400;
+  }
+  td:first-child { font-family: var(--mono); font-size: 13.5px; white-space: nowrap; }
+  td:last-child, th:last-child { padding-right: 0; }
+
+  footer {
+    margin-top: 72px; border-top: 1px solid var(--hair);
+    padding: 28px 0 64px;
+    font-family: var(--mono); font-size: 12px; color: var(--ink-faint);
+    display: flex; flex-wrap: wrap; gap: 10px 28px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="wrap">
+    <span class="brand">Uke<span>Flow</span></span>
+    <nav>
+      <button class="langbtn" data-set-lang="vi" aria-pressed="true">VI</button>
+      <button class="langbtn" data-set-lang="en" aria-pressed="false">EN</button>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="hero">
+      <div>
+        <p class="pill">
+          <span lang="vi">Miễn phí · Không tài khoản · Chạy offline</span>
+          <span lang="en">Free · No account · Works offline</span>
+        </p>
+        <h1>Uke<span>Flow</span></h1>
+        <p class="tagline">Học · Chơi · Lắng nghe · Tiến bộ</p>
+        <p class="lede" lang="vi">
+          Ứng dụng học ukulele bằng tiếng Việt. Có lộ trình cho người chưa từng
+          cầm đàn, 28 hợp âm kèm hướng dẫn bấm từng ngón, máy lên dây bằng
+          microphone, metronome và 9 bài để tập.
+        </p>
+        <p class="lede" lang="en">
+          A ukulele app written in Vietnamese. A path for people who have never
+          held one, 28 chords with finger-by-finger guidance, a microphone
+          tuner, a metronome and nine songs to play.
+        </p>
+
+        <div class="cta">
+          <a class="btn" href="https://github.com/mittohoa/uke-flow/releases/latest/download/ukeflow-arm64-v8a.apk">
+            <span lang="vi">Tải APK</span><span lang="en">Download APK</span>
+            <small>21&nbsp;MB · arm64</small>
+          </a>
+          <a class="btn-2" href="https://github.com/mittohoa/uke-flow/releases/latest/download/ukeflow-armeabi-v7a.apk">
+            <span lang="vi">Máy cũ 32-bit (armeabi-v7a)</span>
+            <span lang="en">Older 32-bit phones (armeabi-v7a)</span>
+          </a>
+        </div>
+        <p class="undercta">
+          <span lang="vi">Phiên bản 1.0.0 · Android 6.0 trở lên · Hầu hết máy từ 2017 chọn bản arm64</span>
+          <span lang="en">Version 1.0.0 · Android 6.0+ · Almost every phone since 2017 wants the arm64 build</span>
+        </p>
+      </div>
+
+      <div class="shot">
+        <img src="screenshots/learning-path.webp" width="440" height="953"
+             alt="Màn hình lộ trình học của UkeFlow, chia ba chặng với các bước đã hoàn thành">
+      </div>
+    </div>
+  </header>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="cai-dat">
+    <h2 lang="vi">Cài trong ba phút</h2>
+    <h2 lang="en">Installed in three minutes</h2>
+    <p class="sublede" lang="vi">
+      UkeFlow chưa có trên CH Play, nên bạn tải thẳng file cài đặt về máy.
+      Android sẽ hỏi một lần cho phép — đó là chuyện bình thường khi cài ngoài chợ ứng dụng.
+    </p>
+    <p class="sublede" lang="en">
+      UkeFlow is not on Play Store yet, so you install the file directly.
+      Android asks for permission once; that is normal for anything installed outside a store.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <b>01</b>
+        <h3 lang="vi">Tải file về</h3>
+        <h3 lang="en">Download the file</h3>
+        <p lang="vi">Bấm nút <em>Tải APK</em> ở trên, ngay trên chính điện thoại bạn muốn cài.</p>
+        <p lang="en">Press <em>Download APK</em> above, on the phone you want it on.</p>
+      </div>
+      <div class="step">
+        <b>02</b>
+        <h3 lang="vi">Mở file và cho phép cài</h3>
+        <h3 lang="en">Open it and allow the install</h3>
+        <p lang="vi">Android hỏi “cho phép cài từ nguồn này?” — bật lên, rồi bấm <em>Cài đặt</em>. Chỉ hỏi lần đầu.</p>
+        <p lang="en">Android asks whether to allow installs from this source. Turn it on, then press <em>Install</em>. It only asks once.</p>
+      </div>
+      <div class="step">
+        <b>03</b>
+        <h3 lang="vi">Lên dây rồi bắt đầu</h3>
+        <h3 lang="en">Tune up and start</h3>
+        <p lang="vi">Mở app, làm bước đầu tiên của lộ trình: lên dây. Đàn sai dây thì bấm đúng vẫn nghe sai.</p>
+        <p lang="en">Open the app and take the first step: tuning. Correct fingers on an out-of-tune instrument still sound wrong.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="noi-bat">
+    <h2 lang="vi">Ba thứ đáng để tải về</h2>
+    <h2 lang="en">Three reasons to bother</h2>
+    <p class="sublede" lang="vi">Ảnh chụp từ máy Android thật, không phải bản vẽ.</p>
+    <p class="sublede" lang="en">Screenshots from a real Android phone, not mockups.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="shot">
+          <img src="screenshots/learning-path.webp" width="440" height="953" loading="lazy"
+               alt="Lộ trình học ba chặng, chặng sau bị khoá cho tới khi xong chặng trước">
+        </div>
+        <h3 lang="vi">Không biết bắt đầu từ đâu? Có lộ trình.</h3>
+        <h3 lang="en">No idea where to start? There is a path.</h3>
+        <p lang="vi">
+          Ba chặng, 15 bước, từ “cầm được cây đàn” tới “chơi được cả bài”.
+          Bước nào đo được thì tự đánh dấu khi bạn tập thật — không phải ô tích bấm cho vui.
+        </p>
+        <p lang="en">
+          Three stages, fifteen steps, from getting a sound out to playing a
+          whole song. Steps that can be measured tick themselves from real
+          practice — not a checklist you tap through.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="shot">
+          <img src="screenshots/fingering-guide.webp" width="440" height="953" loading="lazy"
+               alt="Hướng dẫn bấm hợp âm C, sáng đúng ngón đang được nói tới">
+        </div>
+        <h3 lang="vi">Chỉ từng ngón một</h3>
+        <h3 lang="en">One finger at a time</h3>
+        <p lang="vi">
+          28 hợp âm, mỗi hợp âm chỉ rõ ngón nào đặt vào dây nào, ngăn mấy —
+          kèm mẹo bấm và cái lỗi người mới sắp mắc.
+        </p>
+        <p lang="en">
+          Twenty-eight chords, each one naming which finger goes on which
+          string at which fret — plus a tip and the mistake you are about to make.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="shot">
+          <img src="screenshots/tuner.webp" width="440" height="953" loading="lazy"
+               alt="Máy lên dây với kim chỉ độ lệch và bốn dây G C E A">
+        </div>
+        <h3 lang="vi">Lên dây bằng chính microphone</h3>
+        <h3 lang="en">Tunes by listening</h3>
+        <p lang="vi">
+          Gảy từng dây, app nghe và cho biết đang cao hay thấp bao nhiêu.
+          Âm thanh xử lý ngay trên máy, không gửi đi đâu cả.
+        </p>
+        <p lang="en">
+          Pluck a string and the app tells you how far sharp or flat it is.
+          The audio is processed on the phone and goes nowhere.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="tinh-nang">
+    <h2 lang="vi">Còn những gì nữa</h2>
+    <h2 lang="en">What else is in it</h2>
+    <p class="sublede" lang="vi">Tất cả chạy offline. Không tài khoản, không quảng cáo, không mua thêm gì.</p>
+    <p class="sublede" lang="en">All of it works offline. No account, no ads, nothing to buy.</p>
+
+    <div class="feats">
+      <div class="feat">
+        <div class="shot"><img src="screenshots/chord-map.webp" width="440" height="953" loading="lazy" alt="Bản đồ hợp âm dạng chòm sao"></div>
+        <div>
+          <h3 lang="vi">Bản đồ hợp âm</h3>
+          <h3 lang="en">Chord map</h3>
+          <p lang="vi">Hợp âm xếp theo vòng quãng năm, màu cho biết bạn thạo tới đâu. Hợp âm gần nhau thì hay đi với nhau.</p>
+          <p lang="en">Chords laid out on the circle of fifths, coloured by how well you know them. Neighbours tend to belong together.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="shot"><img src="screenshots/song-poster.webp" width="440" height="953" loading="lazy" alt="Bài hát hiển thị dạng áp phích toàn màn hình"></div>
+        <div>
+          <h3 lang="vi">Bài hát dạng áp phích</h3>
+          <h3 lang="en">Songs as posters</h3>
+          <p lang="vi">Không thanh công cụ, không nút bấm che mất chữ. Vuốt để đổi bài, kéo lên để chỉnh tốc độ.</p>
+          <p lang="en">No toolbars, no buttons over the words. Swipe to change song, drag up to change tempo.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="shot"><img src="screenshots/transition-drill.webp" width="440" height="953" loading="lazy" alt="Bài luyện chuyển giữa hai hợp âm"></div>
+        <div>
+          <h3 lang="vi">Luyện chuyển hợp âm</h3>
+          <h3 lang="en">Chord change drill</h3>
+          <p lang="vi">Chọn cặp hợp âm, đặt nhịp, đổi đúng vào phách đầu. App nhớ cặp nào bạn hay vấp và gợi lại.</p>
+          <p lang="en">Pick a pair, set a tempo, change on the downbeat. The app remembers which pairs trip you up and brings them back.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="shot"><img src="screenshots/strumming.webp" width="440" height="953" loading="lazy" alt="Mẫu quạt chả với mũi tên lên xuống"></div>
+        <div>
+          <h3 lang="vi">Mẫu quạt chả nghe được</h3>
+          <h3 lang="en">Strumming you can hear</h3>
+          <p lang="vi">Năm mẫu, mỗi mẫu bấm nghe thử được chứ không chỉ nhìn mũi tên lên xuống rồi đoán.</p>
+          <p lang="en">Five patterns, each one playable — not just arrows to stare at and guess from.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="shot"><img src="screenshots/metronome.webp" width="440" height="953" loading="lazy" alt="Metronome hiển thị BPM lớn"></div>
+        <div>
+          <h3 lang="vi">Metronome</h3>
+          <h3 lang="en">Metronome</h3>
+          <p lang="vi">40–200 BPM, gõ theo nhịp để dò tốc độ, nhấn mạnh phách đầu. Nhịp bám theo đồng hồ âm thanh nên không trôi.</p>
+          <p lang="en">40–200 BPM, tap along to find a tempo, accent on the first beat. It rides the audio clock, so it does not drift.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="shot"><img src="screenshots/smart-practice.webp" width="440" height="953" loading="lazy" alt="Màn hình tập theo bài với hợp âm rất lớn"></div>
+        <div>
+          <h3 lang="vi">Tập theo bài</h3>
+          <h3 lang="en">Play along</h3>
+          <p lang="vi">Hợp âm to gần nửa màn hình, đọc được từ khoảng cách ôm đàn. Chỉnh tốc độ ngay giữa lúc đang chơi.</p>
+          <p lang="en">The chord fills half the screen, readable from playing distance. Change the tempo mid-song.</p>
+          <span class="tag" lang="vi">Chấm điểm còn đang mô phỏng</span>
+          <span class="tag" lang="en">Scoring still simulated</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="hoi-dap">
+    <h2 lang="vi">Câu hỏi thường gặp</h2>
+    <h2 lang="en">Questions people ask</h2>
+    <p class="sublede" lang="vi">Kể cả những câu mà câu trả lời không có lợi cho app.</p>
+    <p class="sublede" lang="en">Including the ones the answer does not flatter.</p>
+
+    <details open>
+      <summary lang="vi">Sao Android cảnh báo khi tôi cài?</summary>
+      <summary lang="en">Why does Android warn me when I install it?</summary>
+      <p lang="vi">
+        Vì file tải thẳng từ đây chứ không qua CH Play. Android hỏi bạn có tin
+        nguồn này không — bật cho phép một lần rồi cài bình thường. Cảnh báo đó
+        nói về <em>nơi tải</em>, không nói app có gì xấu.
+      </p>
+      <p lang="en">
+        Because the file comes from here rather than from Play Store. Android asks
+        whether you trust the source; allow it once and install as normal. The
+        warning is about <em>where it came from</em>, not about what is inside.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">App có cần mạng không?</summary>
+      <summary lang="en">Does it need an internet connection?</summary>
+      <p lang="vi">
+        Không. UkeFlow không có một dòng mã mạng nào — mọi bài hát, hợp âm và
+        dữ liệu tập đều nằm trong máy. Bật máy bay vẫn dùng được hết.
+      </p>
+      <p lang="en">
+        No. UkeFlow contains no networking code at all — every song, chord and
+        practice record lives on the phone. It works fine in airplane mode.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">App có nghe lén không?</summary>
+      <summary lang="en">Is it listening to me?</summary>
+      <p lang="vi">
+        Microphone chỉ bật khi bạn tự mở phần lên dây và bấm nút bật. Tín hiệu
+        được xử lý ngay trong máy để tính cao độ rồi bỏ đi — không ghi ra file,
+        không gửi đi đâu, mà app cũng không có khả năng gửi.
+      </p>
+      <p lang="en">
+        The microphone only turns on when you open the tuner and press the
+        button. The signal is turned into a pitch on the phone and discarded —
+        nothing is recorded to a file, nothing is sent, and the app has no way
+        to send anything.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">App chấm điểm dựa vào gì?</summary>
+      <summary lang="en">What is the scoring based on?</summary>
+      <p lang="vi">
+        Nói thẳng: phần nhận diện hợp âm qua microphone <strong>vẫn đang mô
+        phỏng</strong>. Nghĩa là điểm số và độ chính xác trong màn tập theo bài
+        chưa phải nghe từ tiếng đàn thật của bạn. Máy lên dây thì nghe thật —
+        đó là hai chuyện khác nhau. Phần nhận diện hợp âm là việc đang làm tiếp.
+      </p>
+      <p lang="en">
+        Straight answer: chord recognition through the microphone is
+        <strong>still simulated</strong>. The scores and accuracy in the
+        play-along screen do not yet come from the sound you make. The tuner
+        does listen for real — the two are different things. Chord recognition
+        is what is being built next.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">Tôi chưa có đàn thì tải làm gì?</summary>
+      <summary lang="en">I do not own a ukulele yet.</summary>
+      <p lang="vi">
+        Vẫn xem được thư viện hợp âm, lộ trình và các bài. Nhưng thành thật thì
+        học đàn phải có đàn — một cây soprano rẻ nhất cũng đủ để đi hết lộ trình này.
+      </p>
+      <p lang="en">
+        You can still read the chord library, the path and the songs. But
+        honestly, learning an instrument needs the instrument — the cheapest
+        soprano is enough for everything here.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">Máy tôi cài được không?</summary>
+      <summary lang="en">Will it run on my phone?</summary>
+      <p lang="vi">
+        Cần Android 6.0 trở lên. Gần như mọi máy từ 2017 dùng bản
+        <em>arm64</em>; nếu máy rất cũ và báo lỗi không cài được, thử bản
+        <em>armeabi-v7a</em>.
+      </p>
+      <p lang="en">
+        Android 6.0 or newer. Almost every phone since 2017 takes the
+        <em>arm64</em> build; if yours is much older and refuses, try the
+        <em>armeabi-v7a</em> one.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">Bài hát lấy từ đâu?</summary>
+      <summary lang="en">Where do the songs come from?</summary>
+      <p lang="vi">
+        Chỉ dân ca và tác phẩm thuộc phạm vi công cộng — Lý Cây Bông, Trống Cơm,
+        Bắc Kim Thang, Kìa Con Bướm Vàng, Twinkle Twinkle, Silent Night, Amazing
+        Grace, Auld Lang Syne — cộng một bài luyện vòng hợp âm tự soạn. Không
+        chép hợp âm hay lời từ các trang nhạc khác. Lời dân ca có dị bản theo
+        vùng, đây là một cách chép phổ biến.
+      </p>
+      <p lang="en">
+        Folk and public-domain material only — a handful of Vietnamese folk
+        songs plus Twinkle Twinkle, Silent Night, Amazing Grace and Auld Lang
+        Syne — with one original chord-loop exercise. Nothing is copied from
+        chord sites. Folk lyrics vary by region; these are one common transcription.
+      </p>
+    </details>
+
+    <details>
+      <summary lang="vi">Cập nhật thế nào?</summary>
+      <summary lang="en">How do updates work?</summary>
+      <p lang="vi">
+        Hiện tại: quay lại trang này tải bản mới rồi cài đè, dữ liệu tập giữ
+        nguyên. Thông báo cập nhật ngay trong app là việc đang làm.
+      </p>
+      <p lang="en">
+        For now: come back here, download the newer file and install over the
+        top; your practice history stays. In-app update notices are on the way.
+      </p>
+    </details>
+  </section>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="rieng-tu">
+    <h2 lang="vi">Quyền riêng tư</h2>
+    <h2 lang="en">Privacy</h2>
+    <p class="sublede" lang="vi">Ngắn, vì thật sự chẳng có gì nhiều để nói.</p>
+    <p class="sublede" lang="en">Short, because there genuinely is not much to say.</p>
+
+    <div class="two">
+      <div class="panel">
+        <h3 lang="vi">App không làm những việc này</h3>
+        <h3 lang="en">The app does not</h3>
+        <ul>
+          <li><span class="cross">✕</span><span lang="vi">Không thu thập hay gửi bất kỳ dữ liệu nào — <b>app không có mã mạng</b>.</span><span lang="en">Collect or send any data — <b>it contains no networking code</b>.</span></li>
+          <li><span class="cross">✕</span><span lang="vi">Không có tài khoản, không đăng nhập, không định danh máy.</span><span lang="en">Have accounts, logins, or any device identifier.</span></li>
+          <li><span class="cross">✕</span><span lang="vi">Không quảng cáo, không thư viện theo dõi.</span><span lang="en">Carry ads or analytics libraries.</span></li>
+          <li><span class="cross">✕</span><span lang="vi">Không ghi âm ra file, kể cả khi đang lên dây.</span><span lang="en">Record audio to a file, not even while tuning.</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3 lang="vi">Những gì app giữ, và giữ ở đâu</h3>
+        <h3 lang="en">What it keeps, and where</h3>
+        <ul>
+          <li><span class="tick">•</span><span lang="vi">Lịch sử tập, độ thành thạo hợp âm, chuỗi ngày — nằm trong <b>một file SQLite trên máy bạn</b>.</span><span lang="en">Practice history, chord mastery, streaks — in <b>one SQLite file on your phone</b>.</span></li>
+          <li><span class="tick">•</span><span lang="vi">Cài đặt ngôn ngữ, giao diện, mục tiêu — lưu trong máy.</span><span lang="en">Language, theme and goal settings — stored on the device.</span></li>
+          <li><span class="tick">•</span><span lang="vi">Gỡ app là mọi thứ mất theo. Không có bản sao ở đâu khác.</span><span lang="en">Uninstalling takes it all with it. There is no copy anywhere else.</span></li>
+          <li><span class="tick">•</span><span lang="vi">Riêng <em>trang web này</em> chạy trên GitHub Pages, nên GitHub có thể ghi log truy cập như mọi trang khác.</span><span lang="en">This <em>web page</em> is hosted on GitHub Pages, so GitHub may log requests as it does for any site.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="giay-phep">
+    <h2 lang="vi">Giấy phép</h2>
+    <h2 lang="en">Licence</h2>
+    <p class="sublede" lang="vi">
+      <strong>UkeFlow miễn phí</strong> — tải về, dùng, đưa cho bạn bè thoải mái.
+      Mã nguồn hiện <strong>chưa công khai</strong>. App được dựng trên các thư
+      viện mã nguồn mở dưới đây, mỗi thư viện giữ giấy phép riêng của nó.
+    </p>
+    <p class="sublede" lang="en">
+      <strong>UkeFlow is free</strong> — download it, use it, pass it on.
+      The source code is <strong>not public</strong> at the moment. The app is
+      built on the open-source libraries below, each under its own licence.
+    </p>
+
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th lang="vi">Thư viện</th><th lang="en">Library</th>
+            <th lang="vi">Giấy phép</th><th lang="en">Licence</th>
+            <th lang="vi">Dùng để làm gì</th><th lang="en">Used for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Flutter</td><td>BSD-3-Clause</td><td><span lang="vi">Nền tảng dựng app</span><span lang="en">The framework itself</span></td></tr>
+          <tr><td>flutter_riverpod 2.6.1</td><td>MIT</td><td><span lang="vi">Quản lý trạng thái</span><span lang="en">State management</span></td></tr>
+          <tr><td>go_router 14.8.1</td><td>BSD-3-Clause</td><td><span lang="vi">Điều hướng màn hình</span><span lang="en">Navigation</span></td></tr>
+          <tr><td>drift 2.31.0</td><td>MIT</td><td><span lang="vi">Lưu lịch sử tập vào SQLite</span><span lang="en">Practice history in SQLite</span></td></tr>
+          <tr><td>sqlite3_flutter_libs 0.5.42</td><td>MIT</td><td><span lang="vi">Bản SQLite đi kèm app</span><span lang="en">The bundled SQLite build</span></td></tr>
+          <tr><td>just_audio 0.9.46</td><td>MIT</td><td><span lang="vi">Phát tiếng metronome và quạt chả</span><span lang="en">Metronome and strum playback</span></td></tr>
+          <tr><td>record 6.2.1</td><td>BSD-3-Clause</td><td><span lang="vi">Đọc microphone cho máy lên dây</span><span lang="en">Microphone input for the tuner</span></td></tr>
+          <tr><td>shared_preferences 2.5.3</td><td>BSD-3-Clause</td><td><span lang="vi">Lưu cài đặt</span><span lang="en">Settings storage</span></td></tr>
+          <tr><td>path_provider 2.1.5</td><td>BSD-3-Clause</td><td><span lang="vi">Tìm thư mục dữ liệu trên máy</span><span lang="en">Finding on-device folders</span></td></tr>
+          <tr><td>intl 0.20.2</td><td>BSD-3-Clause</td><td><span lang="vi">Định dạng ngày giờ, số</span><span lang="en">Date and number formatting</span></td></tr>
+          <tr><td>cupertino_icons 1.0.8</td><td>MIT</td><td><span lang="vi">Bộ biểu tượng</span><span lang="en">Icon set</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="strings" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <section id="lien-he">
+    <h2 lang="vi">Liên hệ</h2>
+    <h2 lang="en">Get in touch</h2>
+    <p class="sublede" lang="vi">
+      Gặp lỗi, thấy lời bài hát chép sai, hay muốn thêm bài — cứ viết thư.
+      Báo lỗi thì cho biết tên máy và bản Android sẽ nhanh hơn nhiều.
+    </p>
+    <p class="sublede" lang="en">
+      Found a bug, spotted wrong lyrics, or want a song added — just write.
+      For bug reports, the phone model and Android version speed things up a lot.
+    </p>
+    <p>
+      <a class="btn" href="mailto:mittohoa@gmail.com?subject=UkeFlow%201.0.0">
+        mittohoa@gmail.com
+      </a>
+    </p>
+  </section>
+
+  <footer>
+    <span>UkeFlow 1.0.0 · Flutter · Android 6.0+</span>
+    <span><a href="https://github.com/mittohoa/uke-flow/releases">
+      <span lang="vi">Các bản phát hành</span><span lang="en">All releases</span>
+    </a></span>
+    <span><a href="#rieng-tu"><span lang="vi">Quyền riêng tư</span><span lang="en">Privacy</span></a></span>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = document.querySelectorAll('[data-set-lang]');
+
+    function apply(lang) {
+      root.dataset.lang = lang;
+      root.setAttribute('lang', lang);
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.setLang === lang));
+      });
+      try { localStorage.setItem('ukeflow-lang', lang); } catch (e) { /* private mode */ }
+    }
+
+    var saved;
+    try { saved = localStorage.getItem('ukeflow-lang'); } catch (e) { saved = null; }
+    // Nothing chosen yet: follow the browser, but default to Vietnamese since
+    // that is who the app is written for.
+    if (!saved) {
+      saved = (navigator.language || '').toLowerCase().indexOf('vi') === 0 ? 'vi'
+            : (navigator.language || '').toLowerCase().indexOf('en') === 0 ? 'en' : 'vi';
+    }
+    apply(saved);
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { apply(b.dataset.setLang); });
+    });
+  })();
+</script>
+
+</body>
+</html>

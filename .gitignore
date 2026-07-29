@@ -1,0 +1,8 @@
+# Intermediate image formats. Only the WebP files are served.
+screenshots/*.png
+screenshots/*.jpg
+
+# Local build output
+dist/
+.DS_Store
+Thumbs.db
