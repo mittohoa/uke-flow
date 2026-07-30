@@ -363,8 +363,8 @@
           </a>
         </div>
         <p class="undercta">
-          <span lang="vi">Phiên bản 1.0.0 · Android 6.0 trở lên · Hầu hết máy từ 2017 chọn bản arm64</span>
-          <span lang="en">Version 1.0.0 · Android 6.0+ · Almost every phone since 2017 wants the arm64 build</span>
+          <span lang="vi">Phiên bản 1.1.0 · Android 6.0 trở lên · Hầu hết máy từ 2017 chọn bản arm64</span>
+          <span lang="en">Version 1.1.0 · Android 6.0+ · Almost every phone since 2017 wants the arm64 build</span>
         </p>
       </div>
 
@@ -590,15 +590,14 @@
       <summary lang="vi">App có nghe lén không?</summary>
       <summary lang="en">Is it listening to me?</summary>
       <p lang="vi">
-        Microphone chỉ bật khi bạn tự mở phần lên dây và bấm nút bật. Tín hiệu
-        được xử lý ngay trong máy để tính cao độ rồi bỏ đi — không ghi ra file,
-        không gửi đi đâu, mà app cũng không có khả năng gửi.
+        Microphone chỉ bật khi bạn tự mở máy lên dây hoặc bắt đầu một bài tập
+        có chấm điểm. Tín hiệu được xử lý ngay trong máy để tính cao độ hoặc
+        nhận diện hợp âm rồi bỏ đi — không ghi ra file, không gửi đi đâu.
       </p>
       <p lang="en">
-        The microphone only turns on when you open the tuner and press the
-        button. The signal is turned into a pitch on the phone and discarded —
-        nothing is recorded to a file, nothing is sent, and the app has no way
-        to send anything.
+        The microphone only turns on when you open the tuner or start a scored
+        practice run. The signal is turned into a pitch or a chord on the
+        phone and discarded — nothing is recorded to a file, nothing is sent.
       </p>
     </details>
 
@@ -606,17 +605,16 @@
       <summary lang="vi">App chấm điểm dựa vào gì?</summary>
       <summary lang="en">What is the scoring based on?</summary>
       <p lang="vi">
-        Nói thẳng: phần nhận diện hợp âm qua microphone <strong>vẫn đang mô
-        phỏng</strong>. Nghĩa là điểm số và độ chính xác trong màn tập theo bài
-        chưa phải nghe từ tiếng đàn thật của bạn. Máy lên dây thì nghe thật —
-        đó là hai chuyện khác nhau. Phần nhận diện hợp âm là việc đang làm tiếp.
+        Từ bản 1.1.0, app <strong>nghe tiếng đàn thật</strong>: microphone nhận
+        diện hợp âm bạn gảy và mọi điểm số — hợp âm, nhịp, tempo, chuyển hợp
+        âm, độ ổn định — tính từ đó. Không có micro thì bài tập vẫn chạy,
+        chỉ ghi nhận "không chấm điểm" thay vì bịa số.
       </p>
       <p lang="en">
-        Straight answer: chord recognition through the microphone is
-        <strong>still simulated</strong>. The scores and accuracy in the
-        play-along screen do not yet come from the sound you make. The tuner
-        does listen for real — the two are different things. Chord recognition
-        is what is being built next.
+        Since 1.1.0 the app <strong>listens for real</strong>: the microphone
+        recognises the chords you strum and every score — chords, rhythm,
+        tempo, transitions, consistency — is computed from that. Without a
+        microphone the run still works, recorded honestly as unscored.
       </p>
     </details>
 
@@ -694,10 +692,10 @@
         <h3 lang="vi">App không làm những việc này</h3>
         <h3 lang="en">The app does not</h3>
         <ul>
-          <li><span class="cross">✕</span><span lang="vi">Không thu thập hay gửi bất kỳ dữ liệu nào — <b>app không có mã mạng</b>.</span><span lang="en">Collect or send any data — <b>it contains no networking code</b>.</span></li>
-          <li><span class="cross">✕</span><span lang="vi">Không có tài khoản, không đăng nhập, không định danh máy.</span><span lang="en">Have accounts, logins, or any device identifier.</span></li>
+          <li><span class="cross">✕</span><span lang="vi">Không gửi dữ liệu cho nhà phát triển — đồng bộ (nếu bạn bật) đi vào project Supabase <b>của chính bạn</b>.</span><span lang="en">Send data to the developer — sync (if you turn it on) goes to <b>your own</b> Supabase project.</span></li>
+          <li><span class="cross">✕</span><span lang="vi">Không bắt đăng nhập — không tài khoản thì app chạy trọn vẹn trên máy.</span><span lang="en">Require an account — without one the app runs fully on-device.</span></li>
           <li><span class="cross">✕</span><span lang="vi">Không quảng cáo, không thư viện theo dõi.</span><span lang="en">Carry ads or analytics libraries.</span></li>
-          <li><span class="cross">✕</span><span lang="vi">Không ghi âm ra file, kể cả khi đang lên dây.</span><span lang="en">Record audio to a file, not even while tuning.</span></li>
+          <li><span class="cross">✕</span><span lang="vi">Không ghi âm ra file — micro nghe để lên dây và nhận diện hợp âm, xử lý xong là bỏ.</span><span lang="en">Record audio to a file — the mic pitch/chord signal is processed and discarded.</span></li>
         </ul>
       </div>
       <div class="panel">
@@ -706,7 +704,10 @@
         <ul>
           <li><span class="tick">•</span><span lang="vi">Lịch sử tập, độ thành thạo hợp âm, chuỗi ngày — nằm trong <b>một file SQLite trên máy bạn</b>.</span><span lang="en">Practice history, chord mastery, streaks — in <b>one SQLite file on your phone</b>.</span></li>
           <li><span class="tick">•</span><span lang="vi">Cài đặt ngôn ngữ, giao diện, mục tiêu — lưu trong máy.</span><span lang="en">Language, theme and goal settings — stored on the device.</span></li>
-          <li><span class="tick">•</span><span lang="vi">Gỡ app là mọi thứ mất theo. Không có bản sao ở đâu khác.</span><span lang="en">Uninstalling takes it all with it. There is no copy anywhere else.</span></li>
+          <li><span class="tick">•</span><span lang="vi">Đăng nhập + bật đồng bộ (tuỳ chọn): lịch sử nằm thêm trên Supabase của bạn — xoá được ngay trong app.</span><span lang="en">Signed in with sync on (optional): history also lives in your Supabase — deletable from inside the app.</span></li>
+          <li><span class="tick">•</span><span lang="vi">HLV AI (tuỳ chọn): gửi <em>số liệu</em> một buổi tập (không audio) tới function của bạn để nhận vài câu nhận xét.</span><span lang="en">AI coach (optional): sends one session's <em>numbers</em> (never audio) to your function for a short note.</span></li>
+          <li><span class="tick">•</span><span lang="vi">App hỏi GitHub xem có phiên bản mới — chỉ tải về số phiên bản.</span><span lang="en">The app asks GitHub whether a newer version exists — only the version number comes back.</span></li>
+          <li><span class="tick">•</span><span lang="vi">Quyền Android: <b>micro</b> (lên dây, chấm hợp âm), <b>camera</b> (quét QR đồng bộ), <b>thông báo</b> (nhắc tập — hỏi khi bạn bật). Từ chối quyền nào, phần đó tắt, còn lại chạy bình thường.</span><span lang="en">Android permissions: <b>microphone</b> (tuner, chord scoring), <b>camera</b> (sync QR), <b>notifications</b> (practice reminder — asked when you enable it). Deny any of them and only that feature stays off.</span></li>
           <li><span class="tick">•</span><span lang="vi">Riêng <em>trang web này</em> chạy trên GitHub Pages, nên GitHub có thể ghi log truy cập như mọi trang khác.</span><span lang="en">This <em>web page</em> is hosted on GitHub Pages, so GitHub may log requests as it does for any site.</span></li>
         </ul>
       </div>
@@ -769,14 +770,14 @@
       For bug reports, the phone model and Android version speed things up a lot.
     </p>
     <p>
-      <a class="btn" href="mailto:mittohoa@gmail.com?subject=UkeFlow%201.0.0">
+      <a class="btn" href="mailto:mittohoa@gmail.com?subject=UkeFlow%201.1.0">
         mittohoa@gmail.com
       </a>
     </p>
   </section>
 
   <footer>
-    <span>UkeFlow 1.0.0 · Flutter · Android 6.0+</span>
+    <span>UkeFlow 1.1.0 · Flutter · Android 6.0+</span>
     <span><a href="https://github.com/mittohoa/uke-flow/releases">
       <span lang="vi">Các bản phát hành</span><span lang="en">All releases</span>
     </a></span>
