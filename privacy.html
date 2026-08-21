@@ -55,8 +55,10 @@
   </table>
   <p>Bạn cũng có thể trỏ app vào <strong>project Supabase của chính bạn</strong> (Cá nhân → Đồng bộ & sao lưu → Nhập tay/QR). Khi đó dữ liệu đi vào hạ tầng của bạn, không phải của nhà phát triển.</p>
 
-  <h2>3. HLV AI (tuỳ chọn, bật sẵn, tắt được)</h2>
-  <p>Sau một buổi tập <em>có chấm điểm</em>, nếu bạn đang đăng nhập và bật <em>HLV AI</em> (Cá nhân → Cài đặt), app gửi <strong>số liệu của đúng buổi tập đó</strong> — tên bài, số phút, 5 điểm thành phần, danh sách hợp âm bấm sai (tên), cặp chuyển chậm nhất, BPM — tới hàm máy chủ của nhà phát triển; hàm này chuyển cho mô hình ngôn ngữ <strong>Google Gemini</strong> (Google AI Studio API) để viết vài câu góp ý. <strong>Không gửi audio, không gửi email/tên, không gửi lịch sử cả đời.</strong> Nhà phát triển không lưu lời nhận xét; Google xử lý theo điều khoản API của họ. Nội dung do AI sinh ra có thể sai — mỗi nhận xét có nút <em>Báo cáo</em>. Tắt công tắc là không gửi gì nữa.</p>
+  <h2>3. HLV AI (tuỳ chọn) — dùng key Gemini của chính bạn</h2>
+  <p>Tính năng này chỉ chạy khi <strong>bạn tự dán key Google Gemini của bạn</strong> vào app (Cá nhân → HLV AI; key miễn phí lấy tại <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>, app có hướng dẫn từng bước và nút dán từ bộ nhớ tạm). Chưa có key, app hiện lời nhắc cài đặt thay vì nhận xét — không gửi gì đi.</p>
+  <p>Khi có key và HLV AI đang bật: sau một buổi tập <em>có chấm điểm</em>, app gửi <strong>số liệu của đúng buổi tập đó</strong> — tên bài, số phút, 5 điểm thành phần, danh sách hợp âm bấm sai (tên), cặp chuyển chậm nhất, BPM — <strong>thẳng từ điện thoại tới Google</strong> (API Gemini) bằng key của bạn, để mô hình viết vài câu góp ý. <strong>Không đi qua máy chủ của Uke Flow; nhà phát triển không thấy, không lưu.</strong> Không gửi audio, không gửi email/tên, không gửi lịch sử cả đời. Google xử lý theo <a href="https://ai.google.dev/gemini-api/terms">điều khoản API Gemini</a> của họ (bậc miễn phí có thể dùng dữ liệu để cải thiện dịch vụ — hãy đọc điều khoản đó).</p>
+  <p>Key được lưu trong kho an toàn của hệ điều hành <strong>trên máy bạn</strong>, không đồng bộ, không gửi cho Uke Flow. Bạn xoá key, tắt công tắc, hoặc gỡ app là hết. Nội dung do AI sinh ra có thể sai — mỗi nhận xét có nút <em>Báo cáo</em>.</p>
 
   <h2>4. Quyền Android app xin và lý do</h2>
   <table>
@@ -81,8 +83,8 @@
   <h2>7. Bên thứ ba được dùng</h2>
   <table>
     <tr><th>Dịch vụ</th><th>Vai trò</th><th>Dữ liệu đi qua</th></tr>
-    <tr><td>Supabase</td><td>Xác thực và cơ sở dữ liệu cho đồng bộ; chạy các hàm máy chủ</td><td>Mục 2 và 3</td></tr>
-    <tr><td>Google Gemini API</td><td>Sinh nhận xét HLV AI</td><td>Số liệu buổi tập (mục 3)</td></tr>
+    <tr><td>Supabase</td><td>Xác thực và cơ sở dữ liệu cho đồng bộ; hàm xoá tài khoản</td><td>Mục 2</td></tr>
+    <tr><td>Google Gemini API</td><td>Sinh nhận xét HLV AI — <em>gọi trực tiếp từ máy bạn bằng key của bạn</em></td><td>Số liệu buổi tập (mục 3)</td></tr>
     <tr><td>GitHub Pages</td><td>Trang web này</td><td>Log truy cập web chuẩn của GitHub</td></tr>
   </table>
 
@@ -110,8 +112,10 @@
   </table>
   <p>You may also point the app at <strong>your own Supabase project</strong> (Profile → Sync & backup → manual / QR). Data then goes to your infrastructure, not the developer's.</p>
 
-  <h2>3. AI coach (optional, on by default, can be turned off)</h2>
-  <p>After a <em>scored</em> practice run, if you are signed in and <em>AI coach</em> is on (Profile → Settings), the app sends <strong>the numbers of that one session</strong> — song title, minutes, the five component scores, the list of misplayed chords (names), slowest transition, BPM — to a developer-run server function, which forwards them to the <strong>Google Gemini</strong> language model (Google AI Studio API) to write a short note. <strong>No audio, no email or name, no lifetime history.</strong> The developer does not store the note; Google processes it under its API terms. AI output can be wrong — every note has a <em>Report</em> button. Turning the switch off stops all sending.</p>
+  <h2>3. AI coach (optional) — with your own Gemini key</h2>
+  <p>This feature runs only when <strong>you paste your own Google Gemini key</strong> into the app (Profile → AI coach; free key from <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>, with step-by-step guidance and a paste-from-clipboard button in the app). Without a key the app shows a setup hint instead of a note — nothing is sent.</p>
+  <p>With a key and the coach switched on: after a <em>scored</em> session the app sends <strong>the numbers of that one session</strong> — song title, minutes, the five scores, misplayed chords (names), slowest transition, BPM — <strong>directly from your phone to Google</strong> (Gemini API) using your key, so the model can write a short note. <strong>It never passes through Uke Flow's servers; the developer cannot see or store it.</strong> No audio, no email or name, no lifetime history. Google processes it under its <a href="https://ai.google.dev/gemini-api/terms">Gemini API terms</a> (the free tier may use data to improve the service — read those terms).</p>
+  <p>The key lives in the operating system's secure store <strong>on your phone</strong>, is not synced and not sent to Uke Flow. Remove the key, switch the coach off, or uninstall — and it's gone. AI output can be wrong — every note has a <em>Report</em> button.</p>
 
   <h2>4. Android permissions and why</h2>
   <table lang="en">
@@ -136,8 +140,8 @@
   <h2>7. Third parties</h2>
   <table lang="en">
     <tr><th>Service</th><th>Role</th><th>Data involved</th></tr>
-    <tr><td>Supabase</td><td>Authentication and database for sync; hosts server functions</td><td>Sections 2 and 3</td></tr>
-    <tr><td>Google Gemini API</td><td>Generates the AI coach note</td><td>Session numbers (section 3)</td></tr>
+    <tr><td>Supabase</td><td>Authentication and database for sync; account-deletion function</td><td>Section 2</td></tr>
+    <tr><td>Google Gemini API</td><td>Generates the AI coach note — <em>called directly from your phone with your key</em></td><td>Session numbers (section 3)</td></tr>
     <tr><td>GitHub Pages</td><td>Hosts this website</td><td>GitHub's standard web access logs</td></tr>
   </table>
 
